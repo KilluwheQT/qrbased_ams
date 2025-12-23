@@ -17,6 +17,12 @@ const geistMono = Geist_Mono({
 export const metadata = {
   title: "QR Code Attendance System",
   description: "A prototype QR code-based attendance system built with Next.js and Firebase",
+  viewport: {
+    width: 'device-width',
+    initialScale: 1,
+    maximumScale: 1,
+    userScalable: false,
+  },
 };
 
 export default function RootLayout({ children }) {

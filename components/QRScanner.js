@@ -583,52 +583,53 @@ export default function QRScannerComponent() {
   };
 
   return (
-    <div className="max-w-md mx-auto bg-white rounded-lg shadow-lg p-6">
-      <h2 className="text-2xl font-bold text-center mb-4">Mark Attendance</h2>
+    <div className="min-h-screen bg-gradient-to-br from-blue-50 to-indigo-50 p-4 sm:p-6 flex items-center justify-center">
+      <div className="w-full max-w-md bg-white rounded-xl shadow-lg p-4 sm:p-6">
+        <h2 className="text-xl sm:text-2xl font-bold text-center mb-4 sm:mb-6 text-gray-800">Mark Attendance</h2>
 
-      {message && (
-        <div
-          className={`p-4 rounded-lg mb-4 text-white text-sm ${
-            messageType === 'success'
-              ? 'bg-green-500'
-              : messageType === 'error'
-              ? 'bg-red-500'
-              : 'bg-blue-500'
-          }`}
-        >
-          {message}
-        </div>
-      )}
-
-      {scanMode === 'menu' && (
-        <div className="space-y-3">
-          <button
-            onClick={startCamera}
-            disabled={loading}
-            className="w-full py-3 px-4 bg-blue-600 hover:bg-blue-700 disabled:bg-gray-400 text-white font-semibold rounded-lg transition"
+        {message && (
+          <div
+            className={`p-3 sm:p-4 rounded-lg mb-4 text-white text-sm ${
+              messageType === 'success'
+                ? 'bg-green-500'
+                : messageType === 'error'
+                ? 'bg-red-500'
+                : 'bg-blue-500'
+            }`}
           >
-            📷 Use Camera
-          </button>
-        </div>
-      )}
+            {message}
+          </div>
+        )}
+
+        {scanMode === 'menu' && (
+          <div className="space-y-3">
+            <button
+              onClick={startCamera}
+              disabled={loading}
+              className="w-full py-3 px-4 bg-blue-600 hover:bg-blue-700 active:bg-blue-800 disabled:bg-gray-400 text-white font-semibold rounded-lg transition touch-highlight"
+            >
+              📷 Use Camera
+            </button>
+          </div>
+        )}
 
       {/* Camera Modal */}
       {scanMode === 'camera' && (
         <div className="fixed inset-0 bg-black bg-opacity-75 flex items-center justify-center z-50 p-4">
-          <div className="bg-white rounded-lg shadow-2xl max-w-xl w-full overflow-hidden">
+          <div className="bg-white rounded-xl shadow-2xl w-full max-h-[90vh] max-w-md sm:max-w-xl overflow-hidden flex flex-col">
             {/* Modal Header */}
-            <div className="bg-blue-600 text-white p-4 flex items-center justify-between">
-              <h3 className="text-lg font-bold">📷 Scan QR Code</h3>
+            <div className="bg-blue-600 text-white p-3 sm:p-4 flex items-center justify-between flex-shrink-0">
+              <h3 className="text-base sm:text-lg font-bold">📷 Scan QR Code</h3>
               <button
                 onClick={stopCamera}
-                className="text-white hover:bg-blue-700 rounded-full p-1"
+                className="text-white hover:bg-blue-700 active:bg-blue-800 rounded-full p-1 transition text-xl touch-highlight"
               >
                 ✕
               </button>
             </div>
 
             {/* Modal Body */}
-            <div className="p-4">
+            <div className="overflow-y-auto flex-1 p-3 sm:p-4">
               {message && (
                 <div
                   className={`p-3 rounded-lg mb-4 text-sm text-white ${
@@ -656,7 +657,7 @@ export default function QRScannerComponent() {
 
                 {/* Scanning Frame Overlay */}
                 <div className="absolute inset-0 flex items-center justify-center pointer-events-none">
-                  <div className="w-64 h-64 border-4 border-green-500 rounded-lg opacity-70"></div>
+                  <div className="w-40 h-40 sm:w-64 sm:h-64 border-4 border-green-500 rounded-lg opacity-70"></div>
                 </div>
 
                 {/* QR overlay (drawn when detection occurs) */}
@@ -672,7 +673,7 @@ export default function QRScannerComponent() {
                 )}
 
                 {/* Scanning Indicator */}
-                <div className="absolute top-4 right-4 flex items-center gap-2 bg-green-500 text-white px-3 py-1 rounded-full text-sm">
+                <div className="absolute top-3 right-3 sm:top-4 sm:right-4 flex items-center gap-2 bg-green-500 text-white px-3 py-1 rounded-full text-xs sm:text-sm">
                   <div className="w-2 h-2 bg-white rounded-full animate-pulse"></div>
                   Scanning...
                 </div>
@@ -680,12 +681,12 @@ export default function QRScannerComponent() {
 
               {/* Show a short troubleshooting hint if stream isn't active */}
               {!streamRef.current && (
-                <div className="p-3 bg-yellow-50 border border-yellow-200 rounded-lg text-sm text-yellow-800 mb-4">
+                <div className="p-3 bg-yellow-50 border border-yellow-200 rounded-lg text-xs sm:text-sm text-yellow-800 mb-4">
                   ⚠️ Camera not started. Check your browser's camera permissions and allow access, then click Retry.
                 </div>
               )}
 
-              <div className="bg-blue-50 border border-blue-200 rounded-lg p-3 text-sm text-gray-700 mb-4">
+              <div className="bg-blue-50 border border-blue-200 rounded-lg p-3 text-xs sm:text-sm text-gray-700 mb-4">
                 <p className="font-semibold mb-1">💡 Tips:</p>
                 <ul className="text-xs space-y-1">
                   <li>• Point camera at QR code</li>
@@ -693,7 +694,7 @@ export default function QRScannerComponent() {
                   <li>• Ensure good lighting</li>
                   <li>• Code will scan automatically</li>
                 </ul>
-                <div className="mt-3 flex justify-between items-center">
+                <div className="mt-3 flex flex-col sm:flex-row justify-between items-start sm:items-center gap-2">
                  
                   <span className="text-xs text-gray-500">Video: {videoInfo.width}x{videoInfo.height} • tracks: {videoInfo.tracks}</span>
                 </div>
@@ -707,24 +708,24 @@ export default function QRScannerComponent() {
               </div>
 
               {debugMode && (
-                <div className="bg-gray-900 text-white p-3 rounded mb-4 text-xs">
-                  <pre className="whitespace-pre-wrap">{`readyState: ${videoInfo.readyState}\nplaying: ${videoInfo.playing}\ntracks: ${videoInfo.tracks}\nsrcObject: ${videoInfo.srcObject}\nstream present: ${!!streamRef.current}`}</pre>
+                <div className="bg-gray-900 text-white p-3 rounded mb-4 text-xs overflow-x-auto">
+                  <pre className="whitespace-pre-wrap break-words">{`readyState: ${videoInfo.readyState}\nplaying: ${videoInfo.playing}\ntracks: ${videoInfo.tracks}\nsrcObject: ${videoInfo.srcObject}\nstream present: ${!!streamRef.current}`}</pre>
                 </div>
               )}
             </div>
 
             {/* Modal Footer */}
-            <div className="bg-gray-100 p-4 border-t flex gap-3">
+            <div className="bg-gray-100 p-3 sm:p-4 border-t flex gap-2 sm:gap-3 flex-shrink-0">
               <button
                 onClick={ensureCameraStream}
                 disabled={loading}
-                className="flex-1 py-2 px-4 bg-yellow-500 hover:bg-yellow-600 text-white font-semibold rounded-lg"
+                className="flex-1 py-2 sm:py-3 px-4 bg-yellow-500 hover:bg-yellow-600 active:bg-yellow-700 text-white font-semibold rounded-lg text-sm sm:text-base transition touch-highlight"
               >
                 Retry
               </button>
               <button
                 onClick={stopCamera}
-                className="flex-1 py-2 px-4 bg-red-600 hover:bg-red-700 text-white font-semibold rounded-lg"
+                className="flex-1 py-2 sm:py-3 px-4 bg-red-600 hover:bg-red-700 active:bg-red-800 text-white font-semibold rounded-lg text-sm sm:text-base transition touch-highlight"
               >
                 Cancel
               </button>
@@ -742,18 +743,18 @@ export default function QRScannerComponent() {
               accept="image/*"
               onChange={handleFileSelect}
               disabled={loading}
-              className="block w-full text-sm text-gray-500
-                file:mr-4 file:py-2 file:px-4
+              className="block w-full text-xs sm:text-sm text-gray-500
+                file:mr-3 sm:file:mr-4 file:py-2 file:px-3 sm:file:px-4
                 file:rounded-lg file:border-0
-                file:text-sm file:font-semibold
+                file:text-xs sm:file:text-sm file:font-semibold
                 file:bg-blue-600 file:text-white
-                hover:file:bg-blue-700 cursor-pointer"
+                hover:file:bg-blue-700 active:file:bg-blue-800 cursor-pointer"
             />
           </label>
           <button
             onClick={() => setScanMode('menu')}
             disabled={loading}
-            className="w-full py-2 px-4 bg-gray-600 hover:bg-gray-700 disabled:bg-gray-400 text-white font-semibold rounded-lg"
+            className="w-full py-2 sm:py-3 px-4 bg-gray-600 hover:bg-gray-700 active:bg-gray-800 disabled:bg-gray-400 text-white font-semibold rounded-lg text-sm sm:text-base transition touch-highlight"
           >
             Back
           </button>
@@ -768,12 +769,12 @@ export default function QRScannerComponent() {
             onChange={(e) => setManualInput(e.target.value)}
             placeholder="eventId:sessionToken"
             disabled={loading}
-            className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
+            className="w-full px-3 sm:px-4 py-2 sm:py-3 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 text-sm sm:text-base"
           />
           <button
             type="submit"
             disabled={loading || !manualInput.trim()}
-            className="w-full py-2 px-4 bg-blue-600 hover:bg-blue-700 disabled:bg-gray-400 text-white font-semibold rounded-lg"
+            className="w-full py-2 sm:py-3 px-4 bg-blue-600 hover:bg-blue-700 active:bg-blue-800 disabled:bg-gray-400 text-white font-semibold rounded-lg text-sm sm:text-base transition touch-highlight"
           >
             {loading ? 'Processing...' : 'Submit'}
           </button>
@@ -781,7 +782,7 @@ export default function QRScannerComponent() {
             type="button"
             onClick={() => setScanMode('menu')}
             disabled={loading}
-            className="w-full py-2 px-4 bg-gray-600 hover:bg-gray-700 disabled:bg-gray-400 text-white font-semibold rounded-lg"
+            className="w-full py-2 sm:py-3 px-4 bg-gray-600 hover:bg-gray-700 active:bg-gray-800 disabled:bg-gray-400 text-white font-semibold rounded-lg text-sm sm:text-base transition touch-highlight"
           >
             Back
           </button>
@@ -789,7 +790,7 @@ export default function QRScannerComponent() {
       )}
 
       {scanMode === 'menu' && (
-        <div className="mt-6 p-3 bg-blue-50 rounded-lg text-xs text-gray-700 border border-blue-200">
+        <div className="mt-6 p-3 sm:p-4 bg-blue-50 rounded-lg text-xs sm:text-sm text-gray-700 border border-blue-200">
           <p className="font-semibold mb-2">📋 How it works:</p>
           <ul className="space-y-1">
             <li>• <strong>Camera:</strong> Point at QR code, scan automatically</li>
@@ -800,10 +801,11 @@ export default function QRScannerComponent() {
       )}
 
       {!user && (
-        <div className="mt-4 p-3 bg-red-50 rounded-lg text-sm text-red-700 border border-red-200">
+        <div className="mt-4 p-3 sm:p-4 bg-red-50 rounded-lg text-xs sm:text-sm text-red-700 border border-red-200">
           ⚠️ Please log in to mark attendance.
         </div>
       )}
+    </div>
     </div>
   );
 }
