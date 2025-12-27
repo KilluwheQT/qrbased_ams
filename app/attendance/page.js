@@ -102,40 +102,66 @@ export default function StudentAttendancePage() {
                 <table className="w-full text-left text-sm">
                   <thead className="bg-gray-100 border-b-2 border-gray-300">
                     <tr>
-                      <th className="px-4 py-3 font-semibold text-gray-700">Event ID</th>
-                      <th className="px-4 py-3 font-semibold text-gray-700">Scan Time</th>
+                      <th className="px-4 py-3 font-semibold text-gray-700">Event</th>
+                      <th className="px-4 py-3 font-semibold text-gray-700">Time In</th>
+                      <th className="px-4 py-3 font-semibold text-gray-700">Time Out</th>
                       <th className="px-4 py-3 font-semibold text-gray-700">Duration</th>
                       <th className="px-4 py-3 font-semibold text-gray-700">Status</th>
                     </tr>
                   </thead>
                   <tbody>
-                    {attendance.map((record, index) => (
-                      <tr
-                        key={record.id}
-                        className={`border-b border-gray-200 ${index % 2 === 0 ? 'bg-white' : 'bg-gray-50'}`}
-                      >
-                        <td className="px-4 py-3 text-gray-900 font-mono text-xs">
-                          {record.eventId.substring(0, 12)}...
-                        </td>
-                        <td className="px-4 py-3 text-gray-600">
-                          {record.scannedAt.toLocaleString()}
-                        </td>
-                        <td className="px-4 py-3 text-gray-600">
-                          {Math.floor(record.duration / 60)} min
-                        </td>
-                        <td className="px-4 py-3">
-                          <span
-                            className={`px-3 py-1 rounded-full text-xs font-semibold ${
-                              record.status === 'present'
-                                ? 'bg-green-100 text-green-800'
-                                : 'bg-yellow-100 text-yellow-800'
-                            }`}
-                          >
-                            {record.status === 'present' ? '✓ Present' : '⏰ Late'}
-                          </span>
-                        </td>
-                      </tr>
-                    ))}
+                    {attendance.map((record, index) => {
+                      const timeIn = record.timeIn?.toDate?.() || record.scannedAt;
+                      const timeOut = record.timeOut?.toDate?.() || null;
+                      const duration = record.totalDuration || (timeOut ? Math.round((timeOut - timeIn) / 60000) : null);
+                      
+                      return (
+                        <tr
+                          key={record.id}
+                          className={`border-b border-gray-200 ${index % 2 === 0 ? 'bg-white' : 'bg-gray-50'}`}
+                        >
+                          <td className="px-4 py-3 text-gray-900">
+                            <div className="font-medium">{record.eventName || 'Event'}</div>
+                            <div className="text-xs text-gray-500 font-mono">{record.eventId.substring(0, 8)}...</div>
+                          </td>
+                          <td className="px-4 py-3 text-gray-600">
+                            <div className="text-green-600 font-medium">
+                              {timeIn.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}
+                            </div>
+                            <div className="text-xs text-gray-500">
+                              {timeIn.toLocaleDateString()}
+                            </div>
+                          </td>
+                          <td className="px-4 py-3 text-gray-600">
+                            {timeOut ? (
+                              <div className="text-red-600 font-medium">
+                                {timeOut.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}
+                              </div>
+                            ) : (
+                              <span className="text-yellow-600 text-sm">Pending...</span>
+                            )}
+                          </td>
+                          <td className="px-4 py-3 text-gray-600">
+                            {duration !== null ? (
+                              <span className="font-medium">{duration} min</span>
+                            ) : (
+                              <span className="text-gray-400">-</span>
+                            )}
+                          </td>
+                          <td className="px-4 py-3">
+                            <span
+                              className={`px-3 py-1 rounded-full text-xs font-semibold ${
+                                record.status === 'present'
+                                  ? 'bg-green-100 text-green-800'
+                                  : 'bg-yellow-100 text-yellow-800'
+                              }`}
+                            >
+                              {record.status === 'present' ? '✓ Present' : '⏰ Late'}
+                            </span>
+                          </td>
+                        </tr>
+                      );
+                    })}
                   </tbody>
                 </table>
               </div>

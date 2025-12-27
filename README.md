@@ -10,6 +10,7 @@ A prototype QR code-based attendance system built with **Next.js** and **Firebas
 ✅ Real-time Attendance Logging & Monitoring  
 ✅ Attendance Statistics & CSV Export  
 ✅ Real-time Firestore Listeners  
+no sign in sign out
 
 ## 🛠️ Tech Stack
 

@@ -27,7 +27,7 @@ export function Navbar() {
     <nav className="gradient-primary text-white shadow-2xl sticky top-0 z-40">
       <div className="max-w-7xl mx-auto px-4 py-4 md:py-5 flex justify-between items-center">
         {/* Logo Section */}
-        <Link href="/" className="flex items-center gap-2 md:gap-3 group flex-shrink-0">
+        <Link href="/" className="flex items-center gap-2 md:gap-3 group shrink-0">
           <div className="text-2xl md:text-3xl font-bold group-hover:animate-pulse-glow">
             🔐
           </div>
@@ -61,7 +61,7 @@ export function Navbar() {
               <div className="w-8 h-8 rounded-full bg-white/20 flex items-center justify-center font-bold text-sm flex-shrink-0">
                 {user.email?.[0]?.toUpperCase()}
               </div>
-              <Button variant="secondary" onClick={() => router.push('/dashboard')} className="text-sm">Dashboard</Button>
+              <Button variant="secondary" onClick={() => router.push('dashboard')} className="text-sm">Dashboard</Button>
               <Button variant="danger" onClick={handleLogout} className="text-sm">Logout</Button>
             </div>
           ) : (
@@ -75,7 +75,7 @@ export function Navbar() {
 
       {/* Mobile Menu */}
       {isMenuOpen && (
-        <div className="md:hidden bg-gradient-to-b from-blue-600 to-purple-600 border-t border-white/10 animate-slideIn">
+        <div className="md:hidden bg-linear-to-b from-blue-600 to-purple-600 border-t border-white/10 animate-slideIn">
           <div className="max-w-7xl mx-auto px-4 py-4 space-y-3">
             {user ? (
               <>
@@ -87,7 +87,7 @@ export function Navbar() {
                 </div>
                 <button
                   onClick={() => {
-                    router.push('/dashboard');
+                    router.push('location/dashboard');
                     closeMenu();
                   }}
                   className="w-full bg-white/20 hover:bg-white/30 text-white font-semibold py-2 px-4 rounded-lg transition-colors text-sm"

@@ -502,28 +502,53 @@ export default function QRScannerComponent() {
         return;
       }
 
-      const [eventId, sessionToken] = qrData.split(':');
-      if (!eventId || !sessionToken) {
-        showMessage('Invalid format. Expected: eventId:sessionToken', 'error');
+      console.log('Processing QR data:', qrData);
+
+      // Handle different QR data formats
+      let eventId, sessionToken;
+      
+      // Try parsing as JSON first (in case QR contains JSON)
+      try {
+        const parsed = JSON.parse(qrData);
+        eventId = parsed.eventId || parsed.id;
+        sessionToken = parsed.sessionToken || parsed.token;
+      } catch (e) {
+        // Not JSON, try colon-separated format
+        const parts = qrData.split(':');
+        if (parts.length >= 2) {
+          eventId = parts[0].trim();
+          sessionToken = parts[1].trim();
+        } else {
+          // Maybe just the eventId alone
+          eventId = qrData.trim();
+        }
+      }
+
+      if (!eventId) {
+        showMessage('Invalid QR code format. No event ID found.', 'error');
         return;
       }
+
+      console.log('Parsed eventId:', eventId, 'sessionToken:', sessionToken);
 
       // Fetch event
       const eventSnap = await getDoc(doc(db, 'events', eventId));
       if (!eventSnap.exists()) {
-        showMessage('Event not found.', 'error');
+        showMessage(`Event not found. ID: ${eventId.substring(0, 8)}...`, 'error');
         return;
       }
 
       const eventData = eventSnap.data();
+      console.log('Event found:', eventData.eventName);
 
-      // Validate
-      if (eventData.sessionToken !== sessionToken) {
-        showMessage('Invalid QR code.', 'error');
+      // Validate session token if provided
+      if (sessionToken && eventData.sessionToken && eventData.sessionToken !== sessionToken) {
+        showMessage('Invalid or expired QR code.', 'error');
         return;
       }
+      
       if (eventData.status !== 'active') {
-        showMessage('Event not accepting attendance.', 'error');
+        showMessage('Event is not currently accepting attendance.', 'error');
         return;
       }
 
@@ -534,7 +559,8 @@ export default function QRScannerComponent() {
         return;
       }
 
-      // Check duplicate
+      // Check for existing attendance record
+      let existingAttendance = null;
       try {
         const existingDocs = await getDocs(
           query(
@@ -544,38 +570,63 @@ export default function QRScannerComponent() {
           )
         );
         if (!existingDocs.empty) {
-          showMessage('You already scanned for this event.', 'info');
-          return;
+          existingAttendance = { id: existingDocs.docs[0].id, ...existingDocs.docs[0].data() };
         }
       } catch (err) {
-        showMessage('Database index pending. Try again in 1-2 min.', 'error');
-        return;
+        console.warn('Query error (index may be pending):', err);
+        // Continue anyway - will create new record
       }
 
       // Get student
       const studentSnap = await getDoc(doc(db, 'students', user.uid));
       if (!studentSnap.exists()) {
-        showMessage('Student profile not found. Complete registration.', 'error');
+        showMessage('Student profile not found. Please complete registration first.', 'error');
         return;
       }
 
       const startTime = eventData.startTime?.toDate?.() || new Date(eventData.startTime);
       const isLate = now > startTime;
 
-      // Record attendance
-      await addDoc(collection(db, 'attendance'), {
-        eventId,
-        studentId: user.uid,
-        email: user.email,
-        studentName: studentSnap.data().fullName || user.email,
-        scannedAt: Timestamp.now(),
-        checkInTime: Timestamp.fromDate(startTime),
-        deviceInfo: navigator.userAgent,
-        status: isLate ? 'late' : 'present',
-        duration: Math.round((now - startTime) / 1000)
-      });
+      // Handle Time In / Time Out logic
+      if (existingAttendance) {
+        // Already have a record - this is a TIME OUT
+        if (existingAttendance.timeOut) {
+          showMessage('You have already checked in and out for this event.', 'info');
+          return;
+        }
+        
+        // Update with time out
+        const { updateDoc } = await import('firebase/firestore');
+        const attendanceRef = doc(db, 'attendance', existingAttendance.id);
+        const timeInDate = existingAttendance.timeIn?.toDate?.() || existingAttendance.scannedAt?.toDate?.() || now;
+        const durationMinutes = Math.round((now - timeInDate) / 60000);
+        
+        await updateDoc(attendanceRef, {
+          timeOut: Timestamp.now(),
+          totalDuration: durationMinutes,
+          updatedAt: Timestamp.now()
+        });
 
-      showMessage('✓ Attendance recorded!', 'success');
+        showMessage(`✓ Time Out recorded! Duration: ${durationMinutes} min`, 'success');
+      } else {
+        // No existing record - this is a TIME IN
+        await addDoc(collection(db, 'attendance'), {
+          eventId,
+          eventName: eventData.eventName || 'Unknown Event',
+          studentId: user.uid,
+          email: user.email,
+          studentName: studentSnap.data().fullName || user.email,
+          scannedAt: Timestamp.now(),
+          timeIn: Timestamp.now(),
+          timeOut: null,
+          checkInTime: Timestamp.fromDate(startTime),
+          deviceInfo: navigator.userAgent,
+          status: isLate ? 'late' : 'present',
+          totalDuration: null
+        });
+
+        showMessage(`✓ Time In recorded for ${eventData.eventName}!`, 'success');
+      }
     } catch (err) {
       console.error('Scan error:', err);
       showMessage('Error: ' + err.message, 'error');
