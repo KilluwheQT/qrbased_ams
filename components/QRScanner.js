@@ -455,6 +455,10 @@ export default function QRScannerComponent() {
     if (!videoRef.current) return;
     const video = videoRef.current;
 
+    // Set mobile-specific attributes via DOM for compatibility
+    video.setAttribute('playsinline', 'true');
+    video.setAttribute('webkit-playsinline', 'true');
+
     const updateInfo = () => {
       setVideoInfo({
         readyState: video.readyState,
@@ -800,12 +804,7 @@ export default function QRScannerComponent() {
                   autoPlay
                   playsInline
                   muted
-                  webkit-playsinline="true"
-                  x5-playsinline="true"
-                  x5-video-player-type="h5"
-                  x5-video-player-fullscreen="true"
                   aria-label="QR scanner video feed"
-                  style={{ transform: 'scaleX(1)' }}
                 />
                 <canvas ref={canvasRef} style={{ display: 'none' }} />
 
