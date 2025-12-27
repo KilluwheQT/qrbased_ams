@@ -60,15 +60,37 @@ export default function QRScannerComponent() {
     try {
       // If we don't have a stream yet, try to get one
       if (!streamRef.current) {
-        try {
-          showMessage('Requesting camera access...', 'info');
-          const s = await navigator.mediaDevices.getUserMedia({ video: { facingMode: 'environment' } });
-          streamRef.current = s;
-        } catch (err) {
-          console.error('ensureCameraStream getUserMedia failed', err);
-          showMessage('Camera permission needed. Please allow camera access.', 'error');
+        // Check if mediaDevices is available
+        if (!navigator.mediaDevices || !navigator.mediaDevices.getUserMedia) {
+          showMessage('Camera not supported. Use image upload instead.', 'error');
           return;
         }
+
+        // Try different camera constraints
+        const constraintsList = [
+          { video: { facingMode: { exact: 'environment' } } },
+          { video: { facingMode: 'environment' } },
+          { video: true },
+          { video: { width: { ideal: 640 }, height: { ideal: 480 } } }
+        ];
+
+        let stream = null;
+        for (const constraints of constraintsList) {
+          try {
+            showMessage('Requesting camera access...', 'info');
+            stream = await navigator.mediaDevices.getUserMedia(constraints);
+            console.log('Camera started with constraints:', constraints);
+            break;
+          } catch (e) {
+            console.warn('Failed with constraints:', constraints, e.message);
+          }
+        }
+
+        if (!stream) {
+          showMessage('Camera permission needed. Please allow camera access or use image upload.', 'error');
+          return;
+        }
+        streamRef.current = stream;
       }
 
       // Wait a bit for the modal and video element to be present
@@ -214,9 +236,40 @@ export default function QRScannerComponent() {
       setLoading(true);
       showMessage('Requesting camera access...', 'info');
 
-      const stream = await navigator.mediaDevices.getUserMedia({
-        video: { facingMode: 'environment', width: { ideal: 1280 }, height: { ideal: 720 } }
-      });
+      // Check if mediaDevices is available (requires HTTPS or localhost)
+      if (!navigator.mediaDevices || !navigator.mediaDevices.getUserMedia) {
+        showMessage('Camera not supported. Please use image upload instead.', 'error');
+        setLoading(false);
+        setScanMode('upload');
+        return;
+      }
+
+      // Try different camera constraints for better compatibility
+      let stream = null;
+      const constraintsList = [
+        // Try back camera first (mobile)
+        { video: { facingMode: { exact: 'environment' } } },
+        // Fallback to any back camera
+        { video: { facingMode: 'environment' } },
+        // Fallback to any camera
+        { video: true },
+        // Last resort with specific resolution
+        { video: { width: { ideal: 640 }, height: { ideal: 480 } } }
+      ];
+
+      for (const constraints of constraintsList) {
+        try {
+          stream = await navigator.mediaDevices.getUserMedia(constraints);
+          console.log('Camera started with constraints:', constraints);
+          break;
+        } catch (e) {
+          console.warn('Failed with constraints:', constraints, e.message);
+        }
+      }
+
+      if (!stream) {
+        throw new Error('Could not access any camera');
+      }
 
       streamRef.current = stream;
 
@@ -660,6 +713,20 @@ export default function QRScannerComponent() {
               className="w-full py-3 px-4 bg-blue-600 hover:bg-blue-700 active:bg-blue-800 disabled:bg-gray-400 text-white font-semibold rounded-lg transition touch-highlight"
             >
               📷 Use Camera
+            </button>
+            <button
+              onClick={() => setScanMode('upload')}
+              disabled={loading}
+              className="w-full py-3 px-4 bg-green-600 hover:bg-green-700 active:bg-green-800 disabled:bg-gray-400 text-white font-semibold rounded-lg transition touch-highlight"
+            >
+              🖼️ Upload QR Image
+            </button>
+            <button
+              onClick={() => setScanMode('manual')}
+              disabled={loading}
+              className="w-full py-3 px-4 bg-gray-600 hover:bg-gray-700 active:bg-gray-800 disabled:bg-gray-400 text-white font-semibold rounded-lg transition touch-highlight"
+            >
+              ⌨️ Enter Code Manually
             </button>
           </div>
         )}
